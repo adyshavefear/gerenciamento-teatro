@@ -1,4 +1,9 @@
 package br.com.gerenciamentoteatro.dao;
 
-public class PropostaAluguelDAO {
+import br.com.gerenciamentoteatro.model.PropostaAluguel;
+
+public class PropostaAluguelDAO extends BaseJPADAO<PropostaAluguel, Long> {
+    public PropostaAluguelDAO() {
+        super(PropostaAluguel.class);
+    }
 }

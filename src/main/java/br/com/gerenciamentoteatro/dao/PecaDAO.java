@@ -1,4 +1,9 @@
 package br.com.gerenciamentoteatro.dao;
 
-public class PecaDAO {
+import br.com.gerenciamentoteatro.model.Peca;
+
+public class PecaDAO extends BaseJPADAO<Peca, Long> {
+    public PecaDAO() {
+        super(Peca.class);
+    }
 }
