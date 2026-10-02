@@ -1,16 +1,10 @@
-# IntelliJ IDEA
+target/
+*.jar
 .idea/
 *.iml
-
-# Maven
-target/
-
-# Compilados
-*.class
-
-# Sistema operacional
+*.mv.db
+*.trace.db
+banco_teatro*
+*.pdf
+*.csv
 .DS_Store
-Thumbs.db
-
-# Logs
-*.log

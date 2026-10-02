@@ -13,7 +13,7 @@ public class Peca {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 150)
     private String nome;
 
     @Column(name = "data_inicio", nullable = false)
@@ -55,9 +55,15 @@ public class Peca {
 
     public Long getId() { return id; }
     public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
     public LocalDate getDataInicio() { return dataInicio; }
+    public void setDataInicio(LocalDate dataInicio) { this.dataInicio = dataInicio; }
     public LocalDate getDataFim() { return dataFim; }
+    public void setDataFim(LocalDate dataFim) { this.dataFim = dataFim; }
     public LocalTime getHorarioInicio() { return horarioInicio; }
+    public void setHorarioInicio(LocalTime horarioInicio) { this.horarioInicio = horarioInicio; }
     public LocalTime getHorarioFim() { return horarioFim; }
+    public void setHorarioFim(LocalTime horarioFim) { this.horarioFim = horarioFim; }
     public Turno getTurno() { return turno; }
+    public void setTurno(Turno turno) { this.turno = turno; }
 }

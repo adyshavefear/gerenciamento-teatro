@@ -11,34 +11,37 @@ public class PropostaAluguel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "data_criacao", nullable = false)
-    private LocalDate dataCriacao;
+    @Column(name = "data_proposta", nullable = false)
+    private LocalDate dataProposta;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "artista_id", nullable = false)
     private Artista artista;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "peca_id", nullable = false)
     private Peca peca;
 
     public PropostaAluguel() {}
 
-    public PropostaAluguel(LocalDate dataCriacao, Artista artista, Peca peca) {
-        this.dataCriacao = dataCriacao;
+    public PropostaAluguel(LocalDate dataProposta, Artista artista, Peca peca) {
+        this.dataProposta = dataProposta;
         this.artista = artista;
         this.peca = peca;
     }
 
-    public PropostaAluguel(Long id, LocalDate dataCriacao, Artista artista, Peca peca) {
+    public PropostaAluguel(Long id, LocalDate dataProposta, Artista artista, Peca peca) {
         this.id = id;
-        this.dataCriacao = dataCriacao;
+        this.dataProposta = dataProposta;
         this.artista = artista;
         this.peca = peca;
     }
 
     public Long getId() { return id; }
-    public LocalDate getDataCriacao() { return dataCriacao; }
+    public LocalDate getDataProposta() { return dataProposta; }
+    public void setDataProposta(LocalDate dataProposta) { this.dataProposta = dataProposta; }
     public Artista getArtista() { return artista; }
+    public void setArtista(Artista artista) { this.artista = artista; }
     public Peca getPeca() { return peca; }
+    public void setPeca(Peca peca) { this.peca = peca; }
 }

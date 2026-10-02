@@ -16,7 +16,7 @@ import java.time.LocalTime;
 public class Main {
 
     public static void main(String[] args) {
-
+        // 1. Instanciação dos Repositórios (conectados ao JPA/H2)
         AdministradorRepository adminRepository = new AdministradorRepository();
         RegraPrecoRepository regraPrecoRepository = new RegraPrecoRepository();
         ContratoAluguelRepository contratoRepository = new ContratoAluguelRepository();
@@ -24,7 +24,7 @@ public class Main {
         ClienteRepository clienteRepository = new ClienteRepository();
         ArtistaRepository artistaRepository = new ArtistaRepository();
 
-
+        // 2. Instanciação dos Serviços
         AdministradorService adminService = new AdministradorService(adminRepository);
         RegraPrecoService regraPrecoService = new RegraPrecoService(regraPrecoRepository);
         ContratoAluguelService contratoService = new ContratoAluguelService(contratoRepository, ingressoRepository, regraPrecoService);
@@ -33,12 +33,15 @@ public class Main {
         IngressoService ingressoService = new IngressoService(ingressoRepository);
         RelatorioFinanceiroService relatorioService = new RelatorioFinanceiroService(contratoRepository, ingressoRepository);
 
-
+        // 3. Seeder: Popula o banco de dados caso esteja vazio
         if (!adminService.existeAdministrador()) {
             carregarDadosDeTeste(adminService, regraPrecoService, artistaService, contratoService);
         }
 
+        // 4. Hook para encerramento seguro do EntityManagerFactory ao fechar o app
+        Runtime.getRuntime().addShutdownHook(new Thread(JPAUtil::fecharFactory));
 
+        // 5. Inicializa a Interface Gráfica passando todos os serviços
         SwingUtilities.invokeLater(() -> {
             TelaLoginUI telaLogin = new TelaLoginUI(
                     adminService,
@@ -51,9 +54,6 @@ public class Main {
             );
             telaLogin.setVisible(true);
         });
-
-
-        Runtime.getRuntime().addShutdownHook(new Thread(JPAUtil::fecharFactory));
     }
 
     private static void carregarDadosDeTeste(
@@ -63,18 +63,18 @@ public class Main {
             ContratoAluguelService contratoService) {
 
         try {
-            // Admin de Teste
+            // Administrador Inicial
             adminService.cadastrarAdministrador("admin@teatro.com", "123456");
 
-            // Regras de Preço Fictícias (Instanciação sem ID)
+            // Regras de Preço Fictícias
             regraPrecoService.cadastrarRegra(new RegraPreco(new BigDecimal("100.00"), DayOfWeek.FRIDAY, Turno.NOTURNO, null, null, null, null));
             regraPrecoService.cadastrarRegra(new RegraPreco(new BigDecimal("150.00"), DayOfWeek.SATURDAY, Turno.NOTURNO, null, null, null, null));
 
-            // Artista Locatário
-            Artista artista = new Artista("123.456.789-00", "Fernanda Montenegro", "(11) 98888-7777", "fernanda@teatro.com", "Feminino", LocalDate.of(1929, 10, 16));
+            // Artista Locatário (Apenas 4 parâmetros: CPF, Nome, Telefone, Email)
+            Artista artista = new Artista("123.456.789-00", "Fernanda Montenegro", "(11) 98888-7777", "fernanda@teatro.com");
             artistaService.cadastrarOuObter(artista);
 
-            // Peça & Proposta/Contrato de Aluguel (Instanciação sem ID)
+            // Peça & Proposta/Contrato de Aluguel
             Peca peca = new Peca("Auto da Compadecida", LocalDate.now(), LocalDate.now().plusDays(5), LocalTime.of(19, 0), LocalTime.of(21, 0), Turno.NOTURNO);
             PropostaAluguel proposta = new PropostaAluguel(LocalDate.now(), artista, peca);
 
@@ -82,9 +82,9 @@ public class Main {
             contrato.setStatus(StatusContrato.CONTRATADO);
             contratoService.cadastrarProposta(contrato);
 
-            System.out.println("Seeder executado: Banco de dados inicializado com sucesso.");
+            System.out.println("Seeder executado: Banco H2 populado com dados de teste inicial!");
         } catch (Exception e) {
-            System.out.println("Aviso: Dados de teste já carregados ou erro no Seeder: " + e.getMessage());
+            System.out.println("Aviso/Erro ao carregar Seeder: " + e.getMessage());
         }
     }
 }
