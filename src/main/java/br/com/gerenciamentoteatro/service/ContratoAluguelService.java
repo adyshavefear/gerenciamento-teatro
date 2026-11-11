@@ -9,9 +9,9 @@ import br.com.gerenciamentoteatro.repository.IngressoRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Objects;
 
 public class ContratoAluguelService {
 
@@ -33,13 +33,15 @@ public class ContratoAluguelService {
             throw new IllegalArgumentException("O contrato de aluguel não pode ser nulo.");
         }
         validarConflitoPeriodo(
-                contrato.getProposta().getPeca().getId(),
+                contrato.getId(),
                 contrato.getDataInicio(),
                 contrato.getDataFim()
         );
+        contrato.setValorTotal(recalcularValorContrato(contrato, contrato.getDataFim()));
         contratoRepository.salvar(contrato);
     }
     public void atualizarContrato(ContratoAluguel contrato) {
+        validarConflitoPeriodo(contrato.getId(), contrato.getDataInicio(), contrato.getDataFim());
         contratoRepository.salvar(contrato);
     }
 
@@ -60,6 +62,10 @@ public class ContratoAluguelService {
             throw new IllegalStateException("O contrato já está encerrado.");
         }
 
+        if (dataEncerramentoEfetiva == null || dataEncerramentoEfetiva.isBefore(contrato.getDataInicio())) {
+            throw new IllegalArgumentException("O encerramento não pode ser anterior ao início do contrato.");
+        }
+
         // Validação Req 14: Não permite antecipar se houver ingressos vendidos para data posterior à data de encerramento
         List<Ingresso> ingressosVendidos = ingressoRepository.listarTodos();
         boolean possuiIngressoFuturo = ingressosVendidos.stream()
@@ -71,8 +77,8 @@ public class ContratoAluguelService {
         }
 
         if (dataEncerramentoEfetiva.isBefore(contrato.getDataFim())) {
+            BigDecimal novoValorAluguel = recalcularValorContrato(contrato, dataEncerramentoEfetiva);
             contrato.setDataFim(dataEncerramentoEfetiva);
-            BigDecimal novoValorAluguel = recalcularValorContrato(contrato);
             contrato.setValorTotal(novoValorAluguel);
             contrato.setStatus(StatusContrato.ENCERRADO_ANTECIPADAMENTE);
         } else {
@@ -97,10 +103,10 @@ public class ContratoAluguelService {
         LocalDate inicioAdicional = contrato.getDataFim().plusDays(1);
 
         // Valida se o período estendido conflita com outras peças cadastradas
-        validarConflitoPeriodo(contrato.getProposta().getPeca().getId(), inicioAdicional, novaDataFim);
+        validarConflitoPeriodo(contrato.getId(), inicioAdicional, novaDataFim);
 
+        BigDecimal novoValorTotal = recalcularValorContrato(contrato, novaDataFim);
         contrato.setDataFim(novaDataFim);
-        BigDecimal novoValorTotal = recalcularValorContrato(contrato);
         contrato.setValorTotal(novoValorTotal);
         contrato.setStatus(StatusContrato.CONTRATADO_COM_ALTERACAO);
 
@@ -109,11 +115,16 @@ public class ContratoAluguelService {
         System.out.println("[EMAIL SIMULADO] Novo contrato estendido enviado para " + contrato.getProposta().getArtista().getEmail());
     }
 
-    private void validarConflitoPeriodo(Long pecaIdAtual, LocalDate inicio, LocalDate fim) {
+    private void validarConflitoPeriodo(Long contratoIdAtual, LocalDate inicio, LocalDate fim) {
+        if (inicio == null || fim == null || fim.isBefore(inicio)) {
+            throw new IllegalArgumentException("Período do contrato inválido.");
+        }
         List<ContratoAluguel> outrosContratos = contratoRepository.listarTodos();
 
         for (ContratoAluguel c : outrosContratos) {
-            if (!c.getId().equals(pecaIdAtual) && c.getStatus() != StatusContrato.ENCERRADO) {
+            if (!Objects.equals(c.getId(), contratoIdAtual)
+                    && c.getStatus() != StatusContrato.ENCERRADO
+                    && c.getStatus() != StatusContrato.ENCERRADO_ANTECIPADAMENTE) {
                 boolean sobrepoe = !(fim.isBefore(c.getDataInicio()) || inicio.isAfter(c.getDataFim()));
                 if (sobrepoe) {
                     throw new IllegalArgumentException("Não é possível realizar a operação: o período conflita com a peça " + c.getProposta().getPeca().getNome());
@@ -122,18 +133,16 @@ public class ContratoAluguelService {
         }
     }
 
-    private BigDecimal recalcularValorContrato(ContratoAluguel contrato) {
+    private BigDecimal recalcularValorContrato(ContratoAluguel contrato, LocalDate fim) {
         BigDecimal total = BigDecimal.ZERO;
         LocalDate atual = contrato.getDataInicio();
 
-        while (!atual.isAfter(contrato.getDataFim())) {
-            BigDecimal valorDia = regraPrecoService.calcularValorHoraAplicavel(
-                    contrato.getProposta().getPeca().getHorarioInicio(),
-                    atual.getDayOfWeek(),
-                    contrato.getProposta().getPeca().getTurno(),
-                    atual.getMonth(),
-                    Integer.valueOf(atual.getYear())
-            );
+        while (!atual.isAfter(fim)) {
+            var peca = contrato.getProposta().getPeca();
+            var inicioExibicao = atual.atTime(peca.getHorarioInicio());
+            var fimExibicao = atual.atTime(peca.getHorarioFim());
+            if (!fimExibicao.isAfter(inicioExibicao)) fimExibicao = fimExibicao.plusDays(1);
+            BigDecimal valorDia = regraPrecoService.calcularValor(inicioExibicao, fimExibicao);
             total = total.add(valorDia);
             atual = atual.plusDays(1);
         }

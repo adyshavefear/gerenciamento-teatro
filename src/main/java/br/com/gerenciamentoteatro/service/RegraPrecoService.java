@@ -104,24 +104,27 @@ public class RegraPrecoService {
 
         BigDecimal valorTotal = BigDecimal.ZERO;
         LocalDateTime momentoAtual = inicio;
+        List<RegraPreco> regras = repository.listarTodos();
 
         while (momentoAtual.isBefore(fim)) {
-            RegraPreco melhorRegra = selecionarMelhorRegra(encontrarRegrasAplicaveis(momentoAtual));
+            LocalDateTime instante = momentoAtual;
+            RegraPreco melhorRegra = selecionarMelhorRegra(regras.stream()
+                    .filter(regra -> seAplicaA(regra, instante)).toList());
 
             if (melhorRegra == null) {
                 throw new IllegalArgumentException("Não existe regra de preço aplicável ao período: " + momentoAtual);
             }
 
-            LocalDateTime proximoMomento = momentoAtual.toLocalDate().plusDays(1).atStartOfDay();
+            // shortcut: tarifas seguem a precisão HH:mm da UI; revisar se houver agendamento por segundo.
+            LocalDateTime proximoMomento = momentoAtual.truncatedTo(java.time.temporal.ChronoUnit.MINUTES).plusMinutes(1);
 
             if (proximoMomento.isAfter(fim)) {
                 proximoMomento = fim;
             }
 
-            long minutos = Duration.between(momentoAtual, proximoMomento).toMinutes();
-
-            BigDecimal horas = BigDecimal.valueOf(minutos)
-                    .divide(BigDecimal.valueOf(60), 10, RoundingMode.HALF_UP);
+            long nanos = Duration.between(momentoAtual, proximoMomento).toNanos();
+            BigDecimal horas = BigDecimal.valueOf(nanos)
+                    .divide(BigDecimal.valueOf(3_600_000_000_000L), 16, RoundingMode.HALF_UP);
 
             BigDecimal valorPeriodo = melhorRegra.getValorHora().multiply(horas);
             valorTotal = valorTotal.add(valorPeriodo);

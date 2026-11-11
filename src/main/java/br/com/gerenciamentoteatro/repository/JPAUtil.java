@@ -7,7 +7,7 @@ import jakarta.persistence.Persistence;
 public class JPAUtil {
 
     private static final EntityManagerFactory FACTORY =
-            Persistence.createEntityManagerFactory("TeatroPU");
+            Persistence.createEntityManagerFactory(System.getProperty("teatro.persistenceUnit", "TeatroPU"));
 
     public static EntityManager getEntityManager() {
         return FACTORY.createEntityManager();

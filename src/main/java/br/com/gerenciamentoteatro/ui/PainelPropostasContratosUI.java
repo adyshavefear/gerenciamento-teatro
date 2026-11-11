@@ -159,8 +159,7 @@ public class PainelPropostasContratosUI extends JPanel {
         if (contrato != null) {
             contrato.setStatus(StatusContrato.CONTRATADO);
             try {
-                // Aqui o service deve persistir o status no banco de dados H2
-                // contratoService.atualizar(contrato);
+                contratoService.atualizarContrato(contrato);
                 JOptionPane.showMessageDialog(this, "Proposta promovida a CONTRATADO com sucesso!");
                 atualizarTabela();
             } catch (Exception e) {

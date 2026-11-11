@@ -1,6 +1,7 @@
 package br.com.gerenciamentoteatro.model;
 
 import jakarta.persistence.*;
+import java.time.Instant;
 
 @Entity
 @Table(name = "tb_administrador")
@@ -18,6 +19,8 @@ public class Administrador {
 
     @Column(name = "codigo_recuperacao")
     private String codigoRecuperacao;
+
+    private Instant codigoRecuperacaoExpiraEm;
 
     public Administrador() {}
 
@@ -39,4 +42,6 @@ public class Administrador {
     public void setSenha(String senha) { this.senha = senha; }
     public String getCodigoRecuperacao() { return codigoRecuperacao; }
     public void setCodigoRecuperacao(String codigoRecuperacao) { this.codigoRecuperacao = codigoRecuperacao; }
+    public Instant getCodigoRecuperacaoExpiraEm() { return codigoRecuperacaoExpiraEm; }
+    public void setCodigoRecuperacaoExpiraEm(Instant expiraEm) { this.codigoRecuperacaoExpiraEm = expiraEm; }
 }

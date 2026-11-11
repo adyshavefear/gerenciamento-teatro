@@ -21,6 +21,7 @@ class RegraPrecoServiceTest {
 
     @BeforeEach
     void setUp() {
+        TestDatabase.reset();
         service = new RegraPrecoService(
                 new RegraPrecoRepository()
         );
@@ -30,7 +31,6 @@ class RegraPrecoServiceTest {
     void deveAplicarRegraGeral() {
 
         RegraPreco regra = new RegraPreco(
-                1L,
                 new BigDecimal("10.00"),
                 null,
                 null,
@@ -57,7 +57,6 @@ class RegraPrecoServiceTest {
     void deveAplicarRegraPorAno() {
 
         RegraPreco regra = new RegraPreco(
-                1L,
                 new BigDecimal("15.00"),
                 null,
                 null,
@@ -84,7 +83,6 @@ class RegraPrecoServiceTest {
     void naoDeveAplicarRegraDeOutroAno() {
 
         RegraPreco regra = new RegraPreco(
-                1L,
                 new BigDecimal("15.00"),
                 null,
                 null,
@@ -111,7 +109,6 @@ class RegraPrecoServiceTest {
     void deveAplicarRegraPorMes() {
 
         RegraPreco regra = new RegraPreco(
-                1L,
                 new BigDecimal("20.00"),
                 null,
                 null,
@@ -138,7 +135,6 @@ class RegraPrecoServiceTest {
     void naoDeveAplicarRegraDeOutroMes() {
 
         RegraPreco regra = new RegraPreco(
-                1L,
                 new BigDecimal("20.00"),
                 null,
                 null,
@@ -165,7 +161,6 @@ class RegraPrecoServiceTest {
     void deveAplicarRegraPorDiaDaSemana() {
 
         RegraPreco regra = new RegraPreco(
-                1L,
                 new BigDecimal("25.00"),
                 DayOfWeek.TUESDAY,
                 null,
@@ -192,7 +187,6 @@ class RegraPrecoServiceTest {
     void naoDeveAplicarRegraDeOutroDiaDaSemana() {
 
         RegraPreco regra = new RegraPreco(
-                1L,
                 new BigDecimal("25.00"),
                 DayOfWeek.MONDAY,
                 null,
@@ -219,7 +213,6 @@ class RegraPrecoServiceTest {
     void deveAplicarRegraPorHorario() {
 
         RegraPreco regra = new RegraPreco(
-                1L,
                 new BigDecimal("30.00"),
                 null,
                 null,
@@ -246,7 +239,6 @@ class RegraPrecoServiceTest {
     void naoDeveAplicarRegraForaDoHorario() {
 
         RegraPreco regra = new RegraPreco(
-                1L,
                 new BigDecimal("30.00"),
                 null,
                 null,
@@ -273,7 +265,6 @@ class RegraPrecoServiceTest {
     void deveAplicarRegraPorTurno() {
 
         RegraPreco regra = new RegraPreco(
-                1L,
                 new BigDecimal("35.00"),
                 null,
                 Turno.NOTURNO,
@@ -300,7 +291,6 @@ class RegraPrecoServiceTest {
     void naoDeveAplicarRegraDeOutroTurno() {
 
         RegraPreco regra = new RegraPreco(
-                1L,
                 new BigDecimal("35.00"),
                 null,
                 Turno.MATUTINO,
@@ -327,7 +317,6 @@ class RegraPrecoServiceTest {
     void deveAplicarRegraComMultiplosCriterios() {
 
         RegraPreco regra = new RegraPreco(
-                1L,
                 new BigDecimal("50.00"),
                 DayOfWeek.TUESDAY,
                 Turno.NOTURNO,
@@ -354,7 +343,6 @@ class RegraPrecoServiceTest {
     void deveEncontrarTodasAsRegrasAplicaveis() {
 
         RegraPreco regraGeral = new RegraPreco(
-                1L,
                 new BigDecimal("10.00"),
                 null,
                 null,
@@ -365,7 +353,6 @@ class RegraPrecoServiceTest {
         );
 
         RegraPreco regraAgosto = new RegraPreco(
-                2L,
                 new BigDecimal("15.00"),
                 null,
                 null,
@@ -376,7 +363,6 @@ class RegraPrecoServiceTest {
         );
 
         RegraPreco regraTerca = new RegraPreco(
-                3L,
                 new BigDecimal("20.00"),
                 DayOfWeek.TUESDAY,
                 null,
@@ -387,7 +373,6 @@ class RegraPrecoServiceTest {
         );
 
         RegraPreco regraNoturna = new RegraPreco(
-                4L,
                 new BigDecimal("30.00"),
                 DayOfWeek.TUESDAY,
                 Turno.NOTURNO,
@@ -397,10 +382,10 @@ class RegraPrecoServiceTest {
                 2026
         );
 
-        service.adicionarRegra(regraGeral);
-        service.adicionarRegra(regraAgosto);
-        service.adicionarRegra(regraTerca);
-        service.adicionarRegra(regraNoturna);
+        service.cadastrarRegra(regraGeral);
+        service.cadastrarRegra(regraAgosto);
+        service.cadastrarRegra(regraTerca);
+        service.cadastrarRegra(regraNoturna);
 
         LocalDateTime dataHora = LocalDateTime.of(
                 2026,
@@ -420,7 +405,6 @@ class RegraPrecoServiceTest {
     void deveSelecionarRegraDeMaiorValor() {
 
         RegraPreco regra10 = new RegraPreco(
-                1L,
                 new BigDecimal("10.00"),
                 null,
                 null,
@@ -431,7 +415,6 @@ class RegraPrecoServiceTest {
         );
 
         RegraPreco regra30 = new RegraPreco(
-                2L,
                 new BigDecimal("30.00"),
                 null,
                 null,
@@ -442,7 +425,6 @@ class RegraPrecoServiceTest {
         );
 
         RegraPreco regra20 = new RegraPreco(
-                3L,
                 new BigDecimal("20.00"),
                 null,
                 null,
@@ -499,7 +481,6 @@ class RegraPrecoServiceTest {
     void deveRejeitarDataHoraNula() {
 
         RegraPreco regra = new RegraPreco(
-                1L,
                 new BigDecimal("10.00"),
                 null,
                 null,
@@ -518,7 +499,6 @@ class RegraPrecoServiceTest {
     void deveCalcularValorParaTresHoras() {
 
         RegraPreco regra = new RegraPreco(
-                1L,
                 new BigDecimal("30.00"),
                 null,
                 Turno.NOTURNO,
@@ -528,7 +508,7 @@ class RegraPrecoServiceTest {
                 null
         );
 
-        service.adicionarRegra(regra);
+        service.cadastrarRegra(regra);
 
         LocalDateTime inicio = LocalDateTime.of(
                 2026,
@@ -558,7 +538,6 @@ class RegraPrecoServiceTest {
     void deveCalcularValorParaDuasHorasEMeia() {
 
         RegraPreco regra = new RegraPreco(
-                1L,
                 new BigDecimal("30.00"),
                 null,
                 Turno.NOTURNO,
@@ -568,7 +547,7 @@ class RegraPrecoServiceTest {
                 null
         );
 
-        service.adicionarRegra(regra);
+        service.cadastrarRegra(regra);
 
         LocalDateTime inicio = LocalDateTime.of(
                 2026,
@@ -622,7 +601,6 @@ class RegraPrecoServiceTest {
     void deveCalcularValorQuandoHaMudancaDeRegraNoMesmoDia() {
 
         RegraPreco regraNoturnaInicial = new RegraPreco(
-                1L,
                 new BigDecimal("20.00"),
                 DayOfWeek.TUESDAY,
                 Turno.NOTURNO,
@@ -633,7 +611,6 @@ class RegraPrecoServiceTest {
         );
 
         RegraPreco regraNoturnaFinal = new RegraPreco(
-                2L,
                 new BigDecimal("30.00"),
                 DayOfWeek.TUESDAY,
                 Turno.NOTURNO,
@@ -643,8 +620,8 @@ class RegraPrecoServiceTest {
                 2026
         );
 
-        service.adicionarRegra(regraNoturnaInicial);
-        service.adicionarRegra(regraNoturnaFinal);
+        service.cadastrarRegra(regraNoturnaInicial);
+        service.cadastrarRegra(regraNoturnaFinal);
 
         LocalDateTime inicio = LocalDateTime.of(
                 2026,
